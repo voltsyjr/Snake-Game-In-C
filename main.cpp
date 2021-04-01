@@ -22,19 +22,19 @@
 #include <stdio.h>                          //for standard input and output functions
 #include <stdlib.h>                         //for gets() and some of its functions
 int startSetupt(int *start);                                                            //function to welcome user/set initials
-int setLevel(int *food, int *level,int x[], int y[], int *length,int *d, int *dir);     //function to set level
-void theame(int level, int scoreValue,char score[], char levelShow[]);                  //function to set theame of level
+int setLevel(int *food, int *level,int x[], int y[], int *length,int *d, int *dir,int *infinite);     //function to set level
+void theame(int level, int scoreValue,char score[], char levelShow[],int infinite);                  //function to set theame of level
 void foodGenerate(int x[], int y[], int *rx, int *ry, int *length, int *food,int *scoreValue);  //function to generate food
 void drawSnake(int x[], int y[],int length,int level);                                  //function to draw snake body
-void levelSpeed(int level);                                                             //function to set speed of snake according to level
+void levelSpeed(int level,int infinite);                                                             //function to set speed of snake according to level
 void input(int *d, int *dir);                                                           //function to take input from user
 void directionLogic(int d,int x[],int y[],int *dir);                                    //function to give direction to snake
-int diedCondition(int scoreValue,int level,int length,int *chk,int x[],int y[],char score[],char levelShow[]);  //function for snake to die
-int endFunc(int scoreValue, int a, int level,char score[],char levelShow[]);            //function to end game
+int diedCondition(int scoreValue,int level,int length,int *chk,int x[],int y[],char score[],char levelShow[],int infinite);  //function for snake to die
+int endFunc(int scoreValue, int a, int level,char score[],char levelShow[],int infinite);            //function to end game
 void winFunction();                                                                     //function for winning condition
 int main()
 {
-    int rx=200,ry=200,x[200]={0},y[200]={0},d;
+    int rx=200,ry=200,x[200]={0},y[200]={0},d,infinite=0;
     int food=1, chk=700,dir=1,length=1,level=1,winCondition=0,scoreValue=0,start=0,play=0,initialExit=0,endGame=0;
     char score[50], levelShow[50],replaying[100];
     srand(time(0));
@@ -44,16 +44,22 @@ int main()
         replays:
         system("cls");
         printf("\n\t\t\t\t\t\t   Select Level!\n");                     //promt user to select user
-        printf("\t\t\t\t\t\tPress 1 for level 1\n\t\t\t\t\t\tPress 2 for level 2\n\t\t\t\t\t\tPress 3 for level 3\n\t\t\t\t\t\tPress 4 for level 4\n\t\t\t\t\t\tPress 5 for level 5\n\t\t\t\t\t\t\t");
+        printf("\t\t\t\t\t\tPress 1 for level 1\n\t\t\t\t\t\tPress 2 for level 2\n\t\t\t\t\t\tPress 3 for level 3\n\t\t\t\t\t\tPress 4 for level 4\n\t\t\t\t\t\tPress 5 for level 5\n\t\t\t\t\t\tPress 6 for survival mode\n\t\t\t\t\t\t\t");
         fflush(stdin);
         scanf("%d",&level);
+        if(level==6){
+            infinite=1;
+        }
         fflush(stdin);
-        while(level>5||level<1){                                        //if user entered wrong level value than to correct him
+        while(level>6||level<1){                                        //if user entered wrong level value than to correct him
             system("cls");
             printf("\t\t\t\t\t***Please choose correct level***");
-            printf("\n\t\t\t\t\t\tPress 1 for level 1\n\t\t\t\t\t\tPress 2 for level 2\n\t\t\t\t\t\tPress 3 for level 3\n\t\t\t\t\t\tPress 4 for level 4\n\t\t\t\t\t\tPress 5 for level 5\n\t\t\t\t\t\t\t");
+            printf("\n\t\t\t\t\t\tPress 1 for level 1\n\t\t\t\t\t\tPress 2 for level 2\n\t\t\t\t\t\tPress 3 for level 3\n\t\t\t\t\t\tPress 4 for level 4\n\t\t\t\t\t\tPress 5 for level 5\n\t\t\t\t\t\tPress 6 for survival mode\n\t\t\t\t\t\t\t");
             fflush(stdin);
             scanf("%d",&level);
+            if(level==6){
+                infinite=1;
+            }
             fflush(stdin);
         }
         system("cls");
@@ -68,21 +74,23 @@ int main()
     y[0]=240;
     d=1;
     while(1){
-        winCondition= setLevel(&food, &level,x,y,&length,&d,&dir);   //setting level And winCondition
+        winCondition= setLevel(&food, &level,x,y,&length,&d,&dir,&infinite);   //setting level And winCondition
         if(winCondition==1){
             winFunction();                                           //call winfunction to show winning page
             break;
         }
-        theame(level,scoreValue,score,levelShow);                    //setting theame
+        theame(level,scoreValue,score,levelShow,infinite);                    //setting theame
         foodGenerate(x,y,&rx,&ry,&length,&food,&scoreValue);         //generate food and add score
            setcolor(15);
         setfillstyle(1,2);
         input(&d, &dir);                                             //function to take input from user
         directionLogic(d,x,y,&dir);                                  //function to make logic to move snake
         drawSnake(x,y,length,level);                                 //function to draw snake body
-        levelSpeed(level);                                           //function to set speed level Wise
-        endGame=diedCondition(scoreValue,level,length,&chk,x,y,score,levelShow);    //Condition for ending the game
-        if(endGame==1){break;}
+        levelSpeed(level,infinite);                                           //function to set speed level Wise
+        endGame=diedCondition(scoreValue,level,length,&chk,x,y,score,levelShow,infinite);    //Condition for ending the game
+        if(endGame==1){
+                infinite=0;
+                break;}
         cleardevice();
     }
     }
@@ -148,8 +156,9 @@ int startSetupt(int *start){                                //function to set st
     else if(*start==4){return 1;}                           //to exit game from main menu
     return 0;
 }
-int setLevel(int *food, int *level,int x[], int y[], int *length,int *d, int *dir){
+int setLevel(int *food, int *level,int x[], int y[], int *length,int *d, int *dir,int *infinite){
     char levelshowing[100], temp[100];                      //function to set level
+    if(*infinite==0){
     if(*food==11){                                          //when food crosses 10 increase the level by one
         if(*level!=5){                                      //if current level is not final level than promt user to press enter to continue when level is changed
         setfillstyle(1,5);
@@ -177,6 +186,19 @@ int setLevel(int *food, int *level,int x[], int y[], int *length,int *d, int *di
     }
     else{
         return 0;                                           //else return 0 for not to call win funtion
+    }
+    }
+    else{
+        if(*food==11){
+            *infinite+=1;
+            *food=1;
+        }
+        if(*infinite>20){
+            return 1;                                           //returning one so that we could call win function to congrats player for winning game
+        }
+        else{
+            return 0;                                           //else return 0 for not to call win funtion
+        }
     }
 }
 void input(int *d, int *dir){                               //function to take snake direction from user
@@ -222,27 +244,27 @@ void directionLogic(int d,int x[],int y[],int *dir){        //function to give d
             }
 }
 
-void levelSpeed(int level){                                 //set speed of snake according to the level
-    if(level==1){
+void levelSpeed(int level,int infinite){                                 //set speed of snake according to the level
+    if(level==1||infinite==1){
         delay(80);                                          //using delay() to change speed
     }
-    else if(level==2){
+    else if(level==2||infinite==2){
         delay(65);
     }
-    else if(level==3){
+    else if(level==3||infinite==3){
         delay(50);
     }
-    else if(level==4){
+    else if(level==4||(infinite!=0&&infinite!=1&&infinite!=2&&infinite!=3)){
         delay(45);
     }
     else if(level==5){
         delay(40);
     }
 }
-void theame(int level, int scoreValue,char score[], char levelShow[]){              //setting theame according to level
+void theame(int level, int scoreValue,char score[], char levelShow[],int infinite){              //setting theame according to level
     if(level==1){             setfillstyle(INTERLEAVE_FILL,2);bar(0,0,640,480);     //background color
                             setfillstyle(CLOSE_DOT_FILL,12);}                           //for boundary style
-    else if(level==2){        setfillstyle(INTERLEAVE_FILL,3);bar(0,0,640,480);     //background color
+    else if(level==2||infinite!=0){        setfillstyle(INTERLEAVE_FILL,3);bar(0,0,640,480);     //background color
                             setfillstyle(CLOSE_DOT_FILL,9);}                            //for boundary style
     else if(level==3){        setfillstyle(INTERLEAVE_FILL,5);bar(0,0,640,480);     //background color
                             setfillstyle(CLOSE_DOT_FILL,7);}                            //for boundary style
@@ -253,8 +275,10 @@ void theame(int level, int scoreValue,char score[], char levelShow[]){          
         setbkcolor(3);                                                              //score and level background
         sprintf(score,"Score: %d",scoreValue);
         outtextxy(30,11,score);                                                     //display score
-        sprintf(levelShow,"Level: %d",level);                                       //display level
-        outtextxy(550,11,levelShow);
+        if(infinite==0){
+            sprintf(levelShow,"Level: %d",level);                                       //display level
+            outtextxy(550,11,levelShow);
+        }
         setbkcolor(0);
         //for boundary
         bar(0,0,640,10);                                                            //top
@@ -303,9 +327,9 @@ void drawSnake(int x[], int y[],int length,int level){                       //f
         }
 }
 
-int diedCondition(int scoreValue,int level,int length,int *chk,int x[],int y[],char score[],char levelShow[]){  //function to check snake died condition
+int diedCondition(int scoreValue,int level,int length,int *chk,int x[],int y[],char score[],char levelShow[],int infinite){  //function to check snake died condition
         if(x[0]>=620||x[0]<=15||y[0]>=455||y[0]<=25){
-            endFunc(scoreValue,0,level,score,levelShow);        //if snake crosses boundary than call endFunc()
+            endFunc(scoreValue,0,level,score,levelShow,infinite);        //if snake crosses boundary than call endFunc()
             return 1;
         }
         for(int i=2;i<length;i++){
@@ -314,11 +338,11 @@ int diedCondition(int scoreValue,int level,int length,int *chk,int x[],int y[],c
             }
         }
         if(x[0]==x[*chk] && y[0]==y[*chk]){                     //if snake touches itself than call endFunc()
-            endFunc(scoreValue,1,level,score,levelShow);
+            endFunc(scoreValue,1,level,score,levelShow,infinite);
             return 1;
         }
 }
-int endFunc(int scoreValue, int a, int level,char score[],char levelShow[]){        //function to show player that he/she has died
+int endFunc(int scoreValue, int a, int level,char score[],char levelShow[],int infinte){        //function to show player that he/she has died
     char ends[100];
     setfillstyle(1,5);
     setbkcolor(5);
@@ -333,12 +357,15 @@ int endFunc(int scoreValue, int a, int level,char score[],char levelShow[]){    
         printf("\n\n\t\t\tYou died into Your self\n");                              //if snake touch itself
     }
     printf("\n\t\t\t\tYour score is: %d \n",scoreValue);
-    printf("\n\t\t\t\tYou Reached Level: %d \n",level);
+    if(infinte==0){
+        printf("\n\t\t\t\tYou Reached Level: %d \n",level);
+    }
     fflush(stdin);
     printf("\n\t\t\t\tPress Enter to continue!");
     gets(ends);
     fflush(stdin);
     system("cls");
+    //*infinte=0;
     return 0;
 }
 
