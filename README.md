@@ -1,7 +1,9 @@
 # Snake-Game-In-C
 This is a repository for Our Snake Game Project. This game is made for our first semester.
+
 						CSB PROJECT:: SNAKE GAME
 					  STEPS TO BE FOLLOWED TO RUN THE GAME:
+		 **************************************************************************************************
 **********************************************************************************************************************************
 
 ---> STEP 1: Download the codeblocks from the link given below.
